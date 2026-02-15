@@ -5,7 +5,7 @@ A robust, fully typed TypeScript client for the Last.fm API.
 ## Installation
 
 ```bash
-npm install lastfm-client
+npm install lastfm.ts
 ```
 
 ## Getting Started
@@ -13,7 +13,7 @@ npm install lastfm-client
 Initialize the client with your Last.fm API credentials.
 
 ```typescript
-import { LastFmClient } from "lastfm-client";
+import { LastFmClient } from "lastfm.ts";
 
 const client = new LastFmClient({
   apiKey: "YOUR_API_KEY",
