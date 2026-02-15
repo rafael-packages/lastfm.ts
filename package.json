@@ -1,0 +1,26 @@
+{
+  "name": "lastfm-client",
+  "version": "1.0.0",
+  "description": "A typed Last.fm API client",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lastfm",
+    "scrobbler",
+    "typescript"
+  ],
+  "files": [
+    "dist"
+  ],
+  "author": "Rafael",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.3"
+  }
+}
