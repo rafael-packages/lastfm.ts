@@ -1,5 +1,5 @@
 {
-  "name": "lastfm-client",
+  "name": "lastfm.ts",
   "version": "1.0.0",
   "description": "A typed Last.fm API client",
   "main": "dist/index.js",
