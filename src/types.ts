@@ -83,6 +83,10 @@ export interface LastFmClientOptions {
   apiKey: string;
   apiSecret: string;
   userAgent?: string;
+  rateLimiting?: boolean;
+  rateLimitMax?: number;
+  rateLimitIntervalMs?: number;
+  cacheTtlMs?: number;
 }
 
 // Album Types
@@ -213,5 +217,319 @@ export type TagInfoResponse = {
   tag: LastFmTag & {
     total?: number;
     reach?: number;
+  };
+};
+
+export type AuthTokenResponse = {
+  token: string;
+};
+
+export type TopAlbumsResponse = {
+  topalbums: {
+    album: Array<{
+      name: string;
+      playcount: string;
+      mbid?: string;
+      url: string;
+      artist: LastFmArtistRef | string;
+      image: LastFmImage[];
+    }>;
+    "@attr"?: {
+      artist?: string;
+      user?: string;
+      tag?: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type TopArtistsResponse = {
+  topartists: {
+    artist: Array<{
+      name: string;
+      playcount: string;
+      listeners?: string;
+      mbid?: string;
+      url: string;
+      streamable?: string;
+      image: LastFmImage[];
+    }>;
+    "@attr"?: {
+      user?: string;
+      tag?: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type TopTracksResponse = {
+  toptracks: {
+    track: Array<{
+      name: string;
+      duration: string;
+      playcount: string;
+      listeners?: string;
+      mbid?: string;
+      url: string;
+      streamable:
+        | string
+        | {
+            "#text": string;
+            fulltrack: string;
+          };
+      artist: LastFmArtistRef | string;
+      image: LastFmImage[];
+    }>;
+    "@attr"?: {
+      artist?: string;
+      user?: string;
+      tag?: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type TopTagsResponse = {
+  toptags: {
+    tag: Array<{
+      name: string;
+      count?: number;
+      url: string;
+    }>;
+    "@attr"?: {
+      artist?: string;
+      album?: string;
+      track?: string;
+    };
+  };
+};
+
+export type TagsResponse = {
+  tags: {
+    tag: Array<{
+      name: string;
+      url: string;
+    }>;
+    "@attr"?: {
+      artist?: string;
+      album?: string;
+      track?: string;
+    };
+  };
+};
+
+export type ArtistCorrectionResponse = {
+  corrections: {
+    correction: {
+      artist: LastFmArtistRef;
+    };
+  };
+};
+
+export type TrackCorrectionResponse = {
+  corrections: {
+    correction: {
+      track: {
+        name: string;
+        url: string;
+        artist: LastFmArtistRef;
+      };
+    };
+  };
+};
+
+export type LibraryArtistsResponse = {
+  artists: {
+    artist: Array<{
+      name: string;
+      playcount: string;
+      tagcount: string;
+      mbid: string;
+      url: string;
+      streamable: string;
+      image: LastFmImage[];
+    }>;
+    "@attr": {
+      user: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type TagSimilarResponse = {
+  similartags: {
+    tag: Array<{
+      name: string;
+      url: string;
+      streamable: string;
+    }>;
+    "@attr": {
+      tag: string;
+    };
+  };
+};
+
+export type WeeklyChartListResponse = {
+  weeklychartlist: {
+    chart: Array<{
+      "#text"?: string;
+      from: string;
+      to: string;
+    }>;
+    "@attr"?: {
+      user?: string;
+    };
+  };
+};
+
+export type UserFriendsResponse = {
+  friends: {
+    user: Array<{
+      name: string;
+      realname: string;
+      country: string;
+      url: string;
+      image: LastFmImage[];
+      registered: {
+        unixtime: string;
+        "#text": number;
+      };
+      playcount: string;
+      playlists: string;
+      bootstrap: string;
+      type: string;
+    }>;
+    "@attr": {
+      user: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type LovedTracksResponse = {
+  lovedtracks: {
+    track: Array<{
+      name: string;
+      mbid: string;
+      url: string;
+      date: {
+        uts: string;
+        "#text": string;
+      };
+      artist: LastFmArtistRef;
+      image: LastFmImage[];
+      streamable:
+        | string
+        | {
+            "#text": string;
+            fulltrack: string;
+          };
+    }>;
+    "@attr": {
+      user: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type PersonalTagsResponse = {
+  taggings: {
+    albums?: {
+      album: Array<{
+        name: string;
+        artist: LastFmArtistRef;
+        url: string;
+        image: LastFmImage[];
+      }>;
+    };
+    artists?: { artist: LastFmArtistRef[] };
+    tracks?: {
+      track: Array<{
+        name: string;
+        artist: LastFmArtistRef;
+        url: string;
+        image: LastFmImage[];
+      }>;
+    };
+    "@attr": {
+      user: string;
+      tag: string;
+      page: string;
+      perPage: string;
+      totalPages: string;
+      total: string;
+    };
+  };
+};
+
+export type WeeklyAlbumChartResponse = {
+  weeklyalbumchart: {
+    album: Array<{
+      name: string;
+      mbid: string;
+      url: string;
+      artist: LastFmArtistRef;
+      playcount: string;
+      rank: string;
+    }>;
+    "@attr": {
+      user: string;
+      from: string;
+      to: string;
+    };
+  };
+};
+
+export type WeeklyArtistChartResponse = {
+  weeklyartistchart: {
+    artist: Array<{
+      name: string;
+      mbid: string;
+      url: string;
+      playcount: string;
+      rank: string;
+    }>;
+    "@attr": {
+      user: string;
+      from: string;
+      to: string;
+    };
+  };
+};
+
+export type WeeklyTrackChartResponse = {
+  weeklytrackchart: {
+    track: Array<{
+      name: string;
+      mbid: string;
+      url: string;
+      artist: LastFmArtistRef;
+      playcount: string;
+      rank: string;
+      image: LastFmImage[];
+    }>;
+    "@attr": {
+      user: string;
+      from: string;
+      to: string;
+    };
   };
 };

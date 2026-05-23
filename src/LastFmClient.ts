@@ -1,20 +1,46 @@
 import crypto from "crypto";
-import {
-  AlbumInfoResponse,
-  AlbumSearchResponse,
-  ArtistInfoResponse,
-  ArtistSearchResponse,
-  ArtistSimilarResponse,
-  AuthSessionResponse,
-  LastFmClientOptions,
-  LastFmTrack,
-  RecentTracksResponse,
-  TagInfoResponse,
-  TrackInfoResponse,
-  TrackSearchResponse,
-  TrackSimilarResponse,
-  UserInfoResponse,
-} from "./types";
+import { LastFmClientOptions } from "./types";
+import { LastFmApiError, LastFmNetworkError, LastFmValidationError } from "./errors/LastFmError";
+import { RateLimiter } from "./utils/RateLimiter";
+import { CacheStore } from "./utils/CacheStore";
+
+// Submodules
+import { AlbumModule } from "./modules/AlbumModule";
+import { ArtistModule } from "./modules/ArtistModule";
+import { AuthModule } from "./modules/AuthModule";
+import { ChartModule } from "./modules/ChartModule";
+import { GeoModule } from "./modules/GeoModule";
+import { LibraryModule } from "./modules/LibraryModule";
+import { TagModule } from "./modules/TagModule";
+import { TrackModule } from "./modules/TrackModule";
+import { UserModule } from "./modules/UserModule";
+
+export interface RequestConfig {
+  method: "GET" | "POST";
+  params: Record<string, string | number | boolean | undefined>;
+  signed: boolean;
+  headers: Record<string, string>;
+  url: string;
+}
+
+export class InterceptorManager<T> {
+  private handlers: Array<T | null> = [];
+
+  public use(handler: T): number {
+    this.handlers.push(handler);
+    return this.handlers.length - 1;
+  }
+
+  public eject(id: number): void {
+    if (this.handlers[id] !== undefined) {
+      this.handlers[id] = null;
+    }
+  }
+
+  public get(): T[] {
+    return this.handlers.filter((h): h is T => h !== null);
+  }
+}
 
 export class LastFmClient {
   private apiKey: string;
@@ -22,13 +48,75 @@ export class LastFmClient {
   private userAgent: string;
   private baseUrl = "https://ws.audioscrobbler.com/2.0/";
 
+  // Utilities
+  private rateLimiter: RateLimiter | null = null;
+  private cacheStore: CacheStore | null = null;
+  private cacheTtlMs: number;
+
+  // Interceptors
+  public readonly interceptors = {
+    request: new InterceptorManager<(config: RequestConfig) => RequestConfig | Promise<RequestConfig>>(),
+    response: new InterceptorManager<(response: unknown) => unknown | Promise<unknown>>(),
+    error: new InterceptorManager<(error: unknown) => unknown | Promise<unknown>>(),
+  };
+
+  // Submodules
+  public readonly albums: AlbumModule;
+  public readonly artists: ArtistModule;
+  public readonly auth: AuthModule;
+  public readonly charts: ChartModule;
+  public readonly geo: GeoModule;
+  public readonly library: LibraryModule;
+  public readonly tags: TagModule;
+  public readonly tracks: TrackModule;
+  public readonly users: UserModule;
+
   constructor(options: LastFmClientOptions) {
+    if (!options.apiKey || !options.apiSecret) {
+      throw new LastFmValidationError("API Key and API Secret are required to initialize LastFmClient.");
+    }
+
     this.apiKey = options.apiKey;
     this.apiSecret = options.apiSecret;
-    this.userAgent = options.userAgent || "LastFmClient/1.0.0";
+    this.userAgent = options.userAgent || "LastFmClient/2.0.0";
+
+    // Rate limiting
+    const useRateLimiter = options.rateLimiting ?? true;
+    if (useRateLimiter) {
+      this.rateLimiter = new RateLimiter(
+        options.rateLimitMax ?? 5,
+        options.rateLimitIntervalMs ?? 1000
+      );
+    }
+
+    // Cache
+    this.cacheTtlMs = options.cacheTtlMs ?? 300_000;
+    if (this.cacheTtlMs > 0) {
+      this.cacheStore = new CacheStore(this.cacheTtlMs);
+    }
+
+    this.albums = new AlbumModule(this);
+    this.artists = new ArtistModule(this);
+    this.auth = new AuthModule(this);
+    this.charts = new ChartModule(this);
+    this.geo = new GeoModule(this);
+    this.library = new LibraryModule(this);
+    this.tags = new TagModule(this);
+    this.tracks = new TrackModule(this);
+    this.users = new UserModule(this);
   }
 
-  private sign(params: Record<string, string | number | undefined>): string {
+  // Get authentication URL
+  public getAuthUrl(callbackUrl?: string): string {
+    let url = `https://www.last.fm/api/auth/?api_key=${this.apiKey}`;
+    if (callbackUrl) {
+      url += `&cb=${encodeURIComponent(callbackUrl)}`;
+    }
+    return url;
+  }
+
+  // Generates request signature
+  private sign(params: Record<string, string | number | boolean | undefined>): string {
     const str =
       Object.keys(params)
         .sort()
@@ -39,242 +127,131 @@ export class LastFmClient {
     return crypto.createHash("md5").update(str).digest("hex");
   }
 
-  private async request<T>(
+  // Sends request to Last.fm API
+  public async request<T>(
     method: "GET" | "POST",
-    params: Record<string, string | number | undefined>,
+    params: Record<string, string | number | boolean | undefined>,
     signed = false,
   ): Promise<T> {
-    const searchParams = new URLSearchParams();
-
-    const allParams: Record<string, string> = {
+    const allParams: Record<string, string | number | boolean | undefined> = {
       api_key: this.apiKey,
       format: "json",
-      ...(params as any),
+      ...params,
     };
 
     if (signed) {
       allParams.api_sig = this.sign(allParams);
     }
 
-    for (const [key, value] of Object.entries(allParams)) {
-      if (value !== undefined) searchParams.append(key, String(value));
+    let config: RequestConfig = {
+      method,
+      params: allParams,
+      signed,
+      headers: { "User-Agent": this.userAgent },
+      url: this.baseUrl,
+    };
+
+    for (const interceptor of this.interceptors.request.get()) {
+      config = await interceptor(config);
     }
 
-    if (method === "GET") {
-      const url = `${this.baseUrl}?${searchParams.toString()}`;
-      const res = await fetch(url, {
-        headers: { "User-Agent": this.userAgent },
-      });
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(config.params)) {
+      if (value !== undefined) {
+        searchParams.append(key, String(value));
+      }
+    }
 
-      if (!res.ok) {
-        throw new Error(`Last.fm API Error: ${res.status} ${res.statusText}`);
+    const fullUrl = config.method === "GET"
+      ? `${config.url}?${searchParams.toString()}`
+      : config.url;
+
+    // Cache check
+    let cacheKey = "";
+    if (config.method === "GET" && this.cacheStore) {
+      cacheKey = this.generateCacheKey(config.params);
+      const cached = this.cacheStore.get<T>(cacheKey);
+      if (cached !== null) {
+        return cached;
+      }
+    }
+
+    const fetchTask = async (): Promise<T> => {
+      const fetchOptions: RequestInit = {
+        method: config.method,
+        headers: config.headers,
+      };
+
+      if (config.method === "POST") {
+        fetchOptions.body = searchParams;
       }
 
-      return (await res.json()) as T;
-    } else {
-      const res = await fetch(this.baseUrl, {
-        method: "POST",
-        body: searchParams,
-        headers: { "User-Agent": this.userAgent },
-      });
+      const res = await fetch(fullUrl, fetchOptions);
 
       if (!res.ok) {
-        throw new Error(`Last.fm API Error: ${res.status} ${res.statusText}`);
+        throw new LastFmNetworkError(res.status, res.statusText);
       }
 
-      return (await res.json()) as T;
+      const data = await res.json() as Record<string, unknown>;
+
+      if (data && typeof data === "object" && "error" in data) {
+        throw new LastFmApiError(Number(data.error), String(data.message));
+      }
+
+      if (config.method === "GET" && this.cacheStore) {
+        this.cacheStore.set(cacheKey, data);
+      }
+
+      return data as T;
+    };
+
+    try {
+      let rawResult: T;
+      if (this.rateLimiter) {
+        rawResult = await this.rateLimiter.schedule(fetchTask);
+      } else {
+        rawResult = await fetchTask();
+      }
+
+      let processedResult: unknown = rawResult;
+      for (const interceptor of this.interceptors.response.get()) {
+        processedResult = await interceptor(processedResult);
+      }
+
+      return processedResult as T;
+    } catch (err) {
+      let processedError = err;
+      for (const interceptor of this.interceptors.error.get()) {
+        processedError = await interceptor(processedError);
+      }
+      throw processedError;
     }
   }
 
-  public getAuthUrl(callbackUrl?: string): string {
-    let url = `https://www.last.fm/api/auth/?api_key=${this.apiKey}`;
-    if (callbackUrl) {
-      url += `&cb=${encodeURIComponent(callbackUrl)}`;
+  // Generates deterministic cache key from parameters
+  private generateCacheKey(params: Record<string, unknown>): string {
+    const sortedKeys = Object.keys(params).sort();
+    const cleanParams = sortedKeys.reduce((acc, key) => {
+      if (params[key] !== undefined) {
+        acc[key] = params[key];
+      }
+      return acc;
+    }, {} as Record<string, unknown>);
+    return JSON.stringify(cleanParams);
+  }
+
+  public clearCache(): void {
+    if (this.cacheStore) {
+      this.cacheStore.clear();
     }
-    return url;
   }
 
-  public async getSession(token: string): Promise<AuthSessionResponse> {
-    return this.request<AuthSessionResponse>("GET", { method: "auth.getSession", token }, true);
-  }
-
-  public async getUser(username: string): Promise<UserInfoResponse> {
-    return this.request<UserInfoResponse>("GET", {
-      method: "user.getInfo",
-      user: username,
-    });
-  }
-
-  // Track methods
-  public async getRecentTracks(
-    username: string,
-    limit = 50,
-    page = 1,
-  ): Promise<RecentTracksResponse> {
-    return this.request<RecentTracksResponse>("GET", {
-      method: "user.getRecentTracks",
-      user: username,
-      limit,
-      page,
-    });
-  }
-
-  public async getNowPlaying(username: string): Promise<LastFmTrack | null> {
-    const recentTracks = await this.getRecentTracks(username, 2);
-    const track = recentTracks.recenttracks.track[0];
-
-    if (track && track["@attr"]?.nowplaying === "true") {
-      return track;
+  public destroy(): void {
+    if (this.rateLimiter) {
+      this.rateLimiter.destroy();
     }
-
-    return null;
-  }
-
-  public async getTrackInfo(
-    artist: string,
-    track: string,
-    username?: string,
-  ): Promise<TrackInfoResponse> {
-    return this.request<TrackInfoResponse>("GET", {
-      method: "track.getInfo",
-      artist,
-      track,
-      username,
-    });
-  }
-
-  public async updateNowPlaying(
-    sessionKey: string,
-    artist: string,
-    track: string,
-    album?: string,
-    duration?: number,
-  ): Promise<void> {
-    await this.request(
-      "POST",
-      {
-        method: "track.updateNowPlaying",
-        sk: sessionKey,
-        artist,
-        track,
-        album,
-        duration,
-      },
-      true,
-    );
-  }
-
-  public async scrobble(
-    sessionKey: string,
-    artist: string,
-    track: string,
-    timestamp: number,
-    album?: string,
-  ): Promise<void> {
-    await this.request(
-      "POST",
-      {
-        method: "track.scrobble",
-        sk: sessionKey,
-        artist,
-        track,
-        timestamp,
-        album,
-      },
-      true,
-    );
-  }
-
-  // Album Methods
-  public async getAlbumInfo(
-    artist: string,
-    album: string,
-    username?: string,
-  ): Promise<AlbumInfoResponse> {
-    return this.request<AlbumInfoResponse>("GET", {
-      method: "album.getInfo",
-      artist,
-      album,
-      username,
-    });
-  }
-
-  public async searchAlbum(
-    album: string,
-    limit?: number,
-    page?: number,
-  ): Promise<AlbumSearchResponse> {
-    return this.request<AlbumSearchResponse>("GET", {
-      method: "album.search",
-      album,
-      limit,
-      page,
-    });
-  }
-
-  // Artist Methods
-  public async getArtistInfo(artist: string, username?: string): Promise<ArtistInfoResponse> {
-    return this.request<ArtistInfoResponse>("GET", {
-      method: "artist.getInfo",
-      artist,
-      username,
-    });
-  }
-
-  public async getSimilarArtists(artist: string, limit?: number): Promise<ArtistSimilarResponse> {
-    return this.request<ArtistSimilarResponse>("GET", {
-      method: "artist.getSimilar",
-      artist,
-      limit,
-    });
-  }
-
-  public async searchArtist(
-    artist: string,
-    limit?: number,
-    page?: number,
-  ): Promise<ArtistSearchResponse> {
-    return this.request<ArtistSearchResponse>("GET", {
-      method: "artist.search",
-      artist,
-      limit,
-      page,
-    });
-  }
-
-  // Track Methods
-  public async getSimilarTracks(
-    artist: string,
-    track: string,
-    limit?: number,
-  ): Promise<TrackSimilarResponse> {
-    return this.request<TrackSimilarResponse>("GET", {
-      method: "track.getSimilar",
-      artist,
-      track,
-      limit,
-    });
-  }
-
-  public async searchTrack(
-    track: string,
-    limit?: number,
-    page?: number,
-  ): Promise<TrackSearchResponse> {
-    return this.request<TrackSearchResponse>("GET", {
-      method: "track.search",
-      track,
-      limit,
-      page,
-    });
-  }
-
-  // Tag Methods
-  public async getTagInfo(tag: string, lang?: string): Promise<TagInfoResponse> {
-    return this.request<TagInfoResponse>("GET", {
-      method: "tag.getInfo",
-      tag,
-      lang,
-    });
+    if (this.cacheStore) {
+      this.cacheStore.destroy();
+    }
   }
 }
