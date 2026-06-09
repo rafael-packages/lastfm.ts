@@ -2,6 +2,14 @@
   "name": "@rafaelsilvadeveloper/lastfm.ts",
   "version": "1.0.2",
   "description": "A typed Last.fm API client",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realkalashnikov/lastfm.ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/realkalashnikov/lastfm.ts/issues"
+  },
+  "homepage": "https://github.com/realkalashnikov/lastfm.ts#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

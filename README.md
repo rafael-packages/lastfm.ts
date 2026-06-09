@@ -1,21 +1,11 @@
-# Last.fm Client (Typed)
+# @rafaelsilvadeveloper/lastfm.ts
 
 A typed TypeScript client for the Last.fm API.
 
 ## Installation
 
-Since this is an open-source project, you can install it directly from GitHub:
-
 ```bash
-npm install github:realkalashnikov/lastfm.ts
-```
-
-Or clone it locally and link it:
-
-```bash
-git clone https://github.com/realkalashnikov/lastfm.ts.git
-cd lastfm.ts
-npm run build
+npm install @rafaelsilvadeveloper/lastfm.ts
 ```
 
 ## Getting Started
@@ -23,7 +13,7 @@ npm run build
 Initialize the client with your Last.fm API credentials.
 
 ```typescript
-import { LastFmClient } from "lastfm.ts";
+import { LastFmClient } from "@rafaelsilvadeveloper/lastfm.ts";
 
 const client = new LastFmClient({
   apiKey: "YOUR_API_KEY",
@@ -334,6 +324,12 @@ const weeklyCharts = await client.users.getWeeklyChartList("realkalashnikov");
 // Get weekly track chart
 const weeklyTracks = await client.users.getWeeklyTrackChart("realkalashnikov");
 ```
+
+## Support
+
+For support, questions, or discussions, join our Discord server:
+
+[![Discord Server](https://img.shields.io/discord/1111111111?color=7289da&label=Discord&logo=discord)](https://discord.gg/7Fw7snafYS)
 
 ## License
 
