@@ -4,12 +4,12 @@
   "description": "A strongly typed, zero-dependency TypeScript client for the Last.fm API, featuring rate limiting, caching, and async iterators.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/realkalashnikov/lastfm.ts.git"
+    "url": "git+https://github.com/rafael-packages/lastfm.ts.git"
   },
   "bugs": {
-    "url": "https://github.com/realkalashnikov/lastfm.ts/issues"
+    "url": "https://github.com/rafael-packages/lastfm.ts/issues"
   },
-  "homepage": "https://github.com/realkalashnikov/lastfm.ts#readme",
+  "homepage": "https://github.com/rafael-packages/lastfm.ts#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
