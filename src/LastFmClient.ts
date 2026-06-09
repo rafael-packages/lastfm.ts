@@ -1,22 +1,22 @@
-import crypto from "crypto";
-import { LastFmClientOptions } from "./types";
-import { LastFmApiError, LastFmNetworkError, LastFmValidationError } from "./errors/LastFmError";
-import { RateLimiter } from "./utils/RateLimiter";
-import { CacheStore } from "./utils/CacheStore";
+import crypto from 'crypto';
+import { LastFmClientOptions } from './types';
+import { LastFmApiError, LastFmNetworkError, LastFmValidationError } from './errors/LastFmError';
+import { RateLimiter } from './utils/RateLimiter';
+import { CacheStore } from './utils/CacheStore';
 
 // Submodules
-import { AlbumModule } from "./modules/AlbumModule";
-import { ArtistModule } from "./modules/ArtistModule";
-import { AuthModule } from "./modules/AuthModule";
-import { ChartModule } from "./modules/ChartModule";
-import { GeoModule } from "./modules/GeoModule";
-import { LibraryModule } from "./modules/LibraryModule";
-import { TagModule } from "./modules/TagModule";
-import { TrackModule } from "./modules/TrackModule";
-import { UserModule } from "./modules/UserModule";
+import { AlbumModule } from './modules/AlbumModule';
+import { ArtistModule } from './modules/ArtistModule';
+import { AuthModule } from './modules/AuthModule';
+import { ChartModule } from './modules/ChartModule';
+import { GeoModule } from './modules/GeoModule';
+import { LibraryModule } from './modules/LibraryModule';
+import { TagModule } from './modules/TagModule';
+import { TrackModule } from './modules/TrackModule';
+import { UserModule } from './modules/UserModule';
 
 export interface RequestConfig {
-  method: "GET" | "POST";
+  method: 'GET' | 'POST';
   params: Record<string, string | number | boolean | undefined>;
   signed: boolean;
   headers: Record<string, string>;
@@ -46,7 +46,7 @@ export class LastFmClient {
   private apiKey: string;
   private apiSecret: string;
   private userAgent: string;
-  private baseUrl = "https://ws.audioscrobbler.com/2.0/";
+  private baseUrl = 'https://ws.audioscrobbler.com/2.0/';
 
   // Utilities
   private rateLimiter: RateLimiter | null = null;
@@ -55,7 +55,9 @@ export class LastFmClient {
 
   // Interceptors
   public readonly interceptors = {
-    request: new InterceptorManager<(config: RequestConfig) => RequestConfig | Promise<RequestConfig>>(),
+    request: new InterceptorManager<
+      (config: RequestConfig) => RequestConfig | Promise<RequestConfig>
+    >(),
     response: new InterceptorManager<(response: unknown) => unknown | Promise<unknown>>(),
     error: new InterceptorManager<(error: unknown) => unknown | Promise<unknown>>(),
   };
@@ -73,12 +75,14 @@ export class LastFmClient {
 
   constructor(options: LastFmClientOptions) {
     if (!options.apiKey || !options.apiSecret) {
-      throw new LastFmValidationError("API Key and API Secret are required to initialize LastFmClient.");
+      throw new LastFmValidationError(
+        'API Key and API Secret are required to initialize LastFmClient.'
+      );
     }
 
     this.apiKey = options.apiKey;
     this.apiSecret = options.apiSecret;
-    this.userAgent = options.userAgent || "LastFmClient/2.0.0";
+    this.userAgent = options.userAgent || 'LastFmClient/2.0.0';
 
     // Rate limiting
     const useRateLimiter = options.rateLimiting ?? true;
@@ -122,20 +126,20 @@ export class LastFmClient {
         .sort()
         .filter((k) => params[k] !== undefined)
         .map((k) => `${k}${params[k]}`)
-        .join("") + this.apiSecret;
+        .join('') + this.apiSecret;
 
-    return crypto.createHash("md5").update(str).digest("hex");
+    return crypto.createHash('md5').update(str).digest('hex');
   }
 
   // Sends request to Last.fm API
   public async request<T>(
-    method: "GET" | "POST",
+    method: 'GET' | 'POST',
     params: Record<string, string | number | boolean | undefined>,
-    signed = false,
+    signed = false
   ): Promise<T> {
     const allParams: Record<string, string | number | boolean | undefined> = {
       api_key: this.apiKey,
-      format: "json",
+      format: 'json',
       ...params,
     };
 
@@ -147,7 +151,7 @@ export class LastFmClient {
       method,
       params: allParams,
       signed,
-      headers: { "User-Agent": this.userAgent },
+      headers: { 'User-Agent': this.userAgent },
       url: this.baseUrl,
     };
 
@@ -162,13 +166,12 @@ export class LastFmClient {
       }
     }
 
-    const fullUrl = config.method === "GET"
-      ? `${config.url}?${searchParams.toString()}`
-      : config.url;
+    const fullUrl =
+      config.method === 'GET' ? `${config.url}?${searchParams.toString()}` : config.url;
 
     // Cache check
-    let cacheKey = "";
-    if (config.method === "GET" && this.cacheStore) {
+    let cacheKey = '';
+    if (config.method === 'GET' && this.cacheStore) {
       cacheKey = this.generateCacheKey(config.params);
       const cached = this.cacheStore.get<T>(cacheKey);
       if (cached !== null) {
@@ -182,7 +185,7 @@ export class LastFmClient {
         headers: config.headers,
       };
 
-      if (config.method === "POST") {
+      if (config.method === 'POST') {
         fetchOptions.body = searchParams;
       }
 
@@ -192,13 +195,13 @@ export class LastFmClient {
         throw new LastFmNetworkError(res.status, res.statusText);
       }
 
-      const data = await res.json() as Record<string, unknown>;
+      const data = (await res.json()) as Record<string, unknown>;
 
-      if (data && typeof data === "object" && "error" in data) {
+      if (data && typeof data === 'object' && 'error' in data) {
         throw new LastFmApiError(Number(data.error), String(data.message));
       }
 
-      if (config.method === "GET" && this.cacheStore) {
+      if (config.method === 'GET' && this.cacheStore) {
         this.cacheStore.set(cacheKey, data);
       }
 
@@ -231,12 +234,15 @@ export class LastFmClient {
   // Generates deterministic cache key from parameters
   private generateCacheKey(params: Record<string, unknown>): string {
     const sortedKeys = Object.keys(params).sort();
-    const cleanParams = sortedKeys.reduce((acc, key) => {
-      if (params[key] !== undefined) {
-        acc[key] = params[key];
-      }
-      return acc;
-    }, {} as Record<string, unknown>);
+    const cleanParams = sortedKeys.reduce(
+      (acc, key) => {
+        if (params[key] !== undefined) {
+          acc[key] = params[key];
+        }
+        return acc;
+      },
+      {} as Record<string, unknown>
+    );
     return JSON.stringify(cleanParams);
   }
 

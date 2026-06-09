@@ -1,5 +1,5 @@
-import { BaseModule } from "./BaseModule";
-import * as Types from "../types";
+import { BaseModule } from './BaseModule';
+import * as Types from '../types';
 
 /**
  * Album-specific API endpoints (album.*).
@@ -11,10 +11,10 @@ export class AlbumModule extends BaseModule {
   public async getInfo(
     artist: string,
     album: string,
-    username?: string,
+    username?: string
   ): Promise<Types.AlbumInfoResponse> {
-    return this.request<Types.AlbumInfoResponse>("GET", {
-      method: "album.getInfo",
+    return this.request<Types.AlbumInfoResponse>('GET', {
+      method: 'album.getInfo',
       artist,
       album,
       username,
@@ -27,10 +27,10 @@ export class AlbumModule extends BaseModule {
   public async search(
     album: string,
     limit?: number,
-    page?: number,
+    page?: number
   ): Promise<Types.AlbumSearchResponse> {
-    return this.request<Types.AlbumSearchResponse>("GET", {
-      method: "album.search",
+    return this.request<Types.AlbumSearchResponse>('GET', {
+      method: 'album.search',
       album,
       limit,
       page,
@@ -44,19 +44,19 @@ export class AlbumModule extends BaseModule {
     sessionKey: string,
     artist: string,
     album: string,
-    tags: string | string[],
+    tags: string | string[]
   ): Promise<void> {
-    const tagsStr = Array.isArray(tags) ? tags.join(",") : tags;
+    const tagsStr = Array.isArray(tags) ? tags.join(',') : tags;
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "album.addTags",
+        method: 'album.addTags',
         sk: sessionKey,
         artist,
         album,
         tags: tagsStr,
       },
-      true,
+      true
     );
   }
 
@@ -67,10 +67,10 @@ export class AlbumModule extends BaseModule {
     artist: string,
     album: string,
     username?: string,
-    mbid?: string,
+    mbid?: string
   ): Promise<Types.TagsResponse> {
-    return this.request<Types.TagsResponse>("GET", {
-      method: "album.getTags",
+    return this.request<Types.TagsResponse>('GET', {
+      method: 'album.getTags',
       artist,
       album,
       user: username,
@@ -84,10 +84,10 @@ export class AlbumModule extends BaseModule {
   public async getTopTags(
     artist: string,
     album: string,
-    mbid?: string,
+    mbid?: string
   ): Promise<Types.TopTagsResponse> {
-    return this.request<Types.TopTagsResponse>("GET", {
-      method: "album.getTopTags",
+    return this.request<Types.TopTagsResponse>('GET', {
+      method: 'album.getTopTags',
       artist,
       album,
       mbid,
@@ -101,18 +101,18 @@ export class AlbumModule extends BaseModule {
     sessionKey: string,
     artist: string,
     album: string,
-    tag: string,
+    tag: string
   ): Promise<void> {
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "album.removeTag",
+        method: 'album.removeTag',
         sk: sessionKey,
         artist,
         album,
         tag,
       },
-      true,
+      true
     );
   }
 }

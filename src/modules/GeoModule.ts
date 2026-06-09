@@ -1,5 +1,5 @@
-import { BaseModule } from "./BaseModule";
-import * as Types from "../types";
+import { BaseModule } from './BaseModule';
+import * as Types from '../types';
 
 /**
  * Geo-specific API endpoints (geo.*).
@@ -11,10 +11,10 @@ export class GeoModule extends BaseModule {
   public async getTopArtists(
     country: string,
     limit?: number,
-    page?: number,
+    page?: number
   ): Promise<Types.TopArtistsResponse> {
-    return this.request<Types.TopArtistsResponse>("GET", {
-      method: "geo.getTopArtists",
+    return this.request<Types.TopArtistsResponse>('GET', {
+      method: 'geo.getTopArtists',
       country,
       limit,
       page,
@@ -28,10 +28,10 @@ export class GeoModule extends BaseModule {
     country: string,
     location?: string,
     limit?: number,
-    page?: number,
+    page?: number
   ): Promise<Types.TopTracksResponse> {
-    return this.request<Types.TopTracksResponse>("GET", {
-      method: "geo.getTopTracks",
+    return this.request<Types.TopTracksResponse>('GET', {
+      method: 'geo.getTopTracks',
       country,
       location,
       limit,

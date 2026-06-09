@@ -1,7 +1,7 @@
 {
   "name": "@rafaelsilvadeveloper/lastfm.ts",
   "version": "1.0.3",
-  "description": "A typed Last.fm API client",
+  "description": "A strongly typed, zero-dependency TypeScript client for the Last.fm API, featuring rate limiting, caching, and async iterators.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/realkalashnikov/lastfm.ts.git"
@@ -12,24 +12,31 @@
   "homepage": "https://github.com/realkalashnikov/lastfm.ts#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "scripts": {
     "build": "tsc",
+    "test": "bun test",
     "prepare": "bun run build",
-    "test": "bun test"
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts tests/**/*.ts"
   },
   "keywords": [
     "lastfm",
     "scrobbler",
     "typescript"
   ],
-  "files": [
-    "dist"
-  ],
   "author": "Rafael",
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "@types/bun": "^1.3.14",
     "@types/node": "^25.9.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.9.3"
   }
 }

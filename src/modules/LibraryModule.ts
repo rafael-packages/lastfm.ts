@@ -1,5 +1,5 @@
-import { BaseModule } from "./BaseModule";
-import * as Types from "../types";
+import { BaseModule } from './BaseModule';
+import * as Types from '../types';
 
 /**
  * User library-specific API endpoints (library.*).
@@ -11,10 +11,10 @@ export class LibraryModule extends BaseModule {
   public async getArtists(
     user: string,
     limit?: number,
-    page?: number,
+    page?: number
   ): Promise<Types.LibraryArtistsResponse> {
-    return this.request<Types.LibraryArtistsResponse>("GET", {
-      method: "library.getArtists",
+    return this.request<Types.LibraryArtistsResponse>('GET', {
+      method: 'library.getArtists',
       user,
       limit,
       page,

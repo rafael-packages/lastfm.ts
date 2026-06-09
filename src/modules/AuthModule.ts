@@ -1,5 +1,5 @@
-import { BaseModule } from "./BaseModule";
-import * as Types from "../types";
+import { BaseModule } from './BaseModule';
+import * as Types from '../types';
 
 /**
  * Authentication-specific API endpoints (auth.*).
@@ -17,12 +17,12 @@ export class AuthModule extends BaseModule {
    */
   public async getSession(token: string): Promise<Types.AuthSessionResponse> {
     return this.request<Types.AuthSessionResponse>(
-      "GET",
+      'GET',
       {
-        method: "auth.getSession",
+        method: 'auth.getSession',
         token,
       },
-      true,
+      true
     );
   }
 
@@ -32,16 +32,16 @@ export class AuthModule extends BaseModule {
    */
   public async getMobileSession(
     username: string,
-    authToken: string,
+    authToken: string
   ): Promise<Types.AuthSessionResponse> {
     return this.request<Types.AuthSessionResponse>(
-      "POST",
+      'POST',
       {
-        method: "auth.getMobileSession",
+        method: 'auth.getMobileSession',
         username,
         authToken,
       },
-      true,
+      true
     );
   }
 
@@ -50,11 +50,11 @@ export class AuthModule extends BaseModule {
    */
   public async getToken(): Promise<Types.AuthTokenResponse> {
     return this.request<Types.AuthTokenResponse>(
-      "GET",
+      'GET',
       {
-        method: "auth.getToken",
+        method: 'auth.getToken',
       },
-      true,
+      true
     );
   }
 }

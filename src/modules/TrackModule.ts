@@ -1,6 +1,6 @@
-import { BaseModule } from "./BaseModule";
-import * as Types from "../types";
-import { ScrobbleItem } from "../utils/ScrobbleQueue";
+import { BaseModule } from './BaseModule';
+import * as Types from '../types';
+import { ScrobbleItem } from '../utils/ScrobbleQueue';
 
 /**
  * Track-specific API endpoints (track.*).
@@ -12,10 +12,10 @@ export class TrackModule extends BaseModule {
   public async getInfo(
     artist: string,
     track: string,
-    username?: string,
+    username?: string
   ): Promise<Types.TrackInfoResponse> {
-    return this.request<Types.TrackInfoResponse>("GET", {
-      method: "track.getInfo",
+    return this.request<Types.TrackInfoResponse>('GET', {
+      method: 'track.getInfo',
       artist,
       track,
       username,
@@ -28,10 +28,10 @@ export class TrackModule extends BaseModule {
   public async getSimilar(
     artist: string,
     track: string,
-    limit?: number,
+    limit?: number
   ): Promise<Types.TrackSimilarResponse> {
-    return this.request<Types.TrackSimilarResponse>("GET", {
-      method: "track.getSimilar",
+    return this.request<Types.TrackSimilarResponse>('GET', {
+      method: 'track.getSimilar',
       artist,
       track,
       limit,
@@ -44,10 +44,10 @@ export class TrackModule extends BaseModule {
   public async search(
     track: string,
     limit?: number,
-    page?: number,
+    page?: number
   ): Promise<Types.TrackSearchResponse> {
-    return this.request<Types.TrackSearchResponse>("GET", {
-      method: "track.search",
+    return this.request<Types.TrackSearchResponse>('GET', {
+      method: 'track.search',
       track,
       limit,
       page,
@@ -62,19 +62,19 @@ export class TrackModule extends BaseModule {
     artist: string,
     track: string,
     album?: string,
-    duration?: number,
+    duration?: number
   ): Promise<void> {
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "track.updateNowPlaying",
+        method: 'track.updateNowPlaying',
         sk: sessionKey,
         artist,
         track,
         album,
         duration,
       },
-      true,
+      true
     );
   }
 
@@ -86,19 +86,19 @@ export class TrackModule extends BaseModule {
     artist: string,
     track: string,
     timestamp: number,
-    album?: string,
+    album?: string
   ): Promise<void> {
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "track.scrobble",
+        method: 'track.scrobble',
         sk: sessionKey,
         artist,
         track,
         timestamp,
         album,
       },
-      true,
+      true
     );
   }
 
@@ -106,17 +106,16 @@ export class TrackModule extends BaseModule {
    * Scrobbles multiple tracks in a single batch (up to 50 tracks). Requires authentication.
    * Utilizes index suffixes (e.g. artist[0], track[0], timestamp[0]).
    */
-  public async scrobbleMany(
-    sessionKey: string,
-    items: ScrobbleItem[],
-  ): Promise<any> {
+  public async scrobbleMany(sessionKey: string, items: ScrobbleItem[]): Promise<any> {
     if (items.length === 0) return;
     if (items.length > 50) {
-      throw new Error("Last.fm allows scrobbling a maximum of 50 tracks in a single batch request.");
+      throw new Error(
+        'Last.fm allows scrobbling a maximum of 50 tracks in a single batch request.'
+      );
     }
 
     const params: Record<string, string | number> = {
-      method: "track.scrobble",
+      method: 'track.scrobble',
       sk: sessionKey,
     };
 
@@ -129,7 +128,7 @@ export class TrackModule extends BaseModule {
       }
     });
 
-    return this.request<any>("POST", params, true);
+    return this.request<any>('POST', params, true);
   }
 
   /**
@@ -139,19 +138,19 @@ export class TrackModule extends BaseModule {
     sessionKey: string,
     artist: string,
     track: string,
-    tags: string | string[],
+    tags: string | string[]
   ): Promise<void> {
-    const tagsStr = Array.isArray(tags) ? tags.join(",") : tags;
+    const tagsStr = Array.isArray(tags) ? tags.join(',') : tags;
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "track.addTags",
+        method: 'track.addTags',
         sk: sessionKey,
         artist,
         track,
         tags: tagsStr,
       },
-      true,
+      true
     );
   }
 
@@ -160,10 +159,10 @@ export class TrackModule extends BaseModule {
    */
   public async getCorrection(
     artist: string,
-    track: string,
+    track: string
   ): Promise<Types.TrackCorrectionResponse> {
-    return this.request<Types.TrackCorrectionResponse>("GET", {
-      method: "track.getCorrection",
+    return this.request<Types.TrackCorrectionResponse>('GET', {
+      method: 'track.getCorrection',
       artist,
       track,
     });
@@ -176,10 +175,10 @@ export class TrackModule extends BaseModule {
     artist: string,
     track: string,
     username?: string,
-    mbid?: string,
+    mbid?: string
   ): Promise<Types.TagsResponse> {
-    return this.request<Types.TagsResponse>("GET", {
-      method: "track.getTags",
+    return this.request<Types.TagsResponse>('GET', {
+      method: 'track.getTags',
       artist,
       track,
       user: username,
@@ -193,10 +192,10 @@ export class TrackModule extends BaseModule {
   public async getTopTags(
     artist: string,
     track: string,
-    mbid?: string,
+    mbid?: string
   ): Promise<Types.TopTagsResponse> {
-    return this.request<Types.TopTagsResponse>("GET", {
-      method: "track.getTopTags",
+    return this.request<Types.TopTagsResponse>('GET', {
+      method: 'track.getTopTags',
       artist,
       track,
       mbid,
@@ -206,20 +205,16 @@ export class TrackModule extends BaseModule {
   /**
    * Love a track on the user's profile. Requires authentication.
    */
-  public async love(
-    sessionKey: string,
-    artist: string,
-    track: string,
-  ): Promise<void> {
+  public async love(sessionKey: string, artist: string, track: string): Promise<void> {
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "track.love",
+        method: 'track.love',
         sk: sessionKey,
         artist,
         track,
       },
-      true,
+      true
     );
   }
 
@@ -230,38 +225,34 @@ export class TrackModule extends BaseModule {
     sessionKey: string,
     artist: string,
     track: string,
-    tag: string,
+    tag: string
   ): Promise<void> {
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "track.removeTag",
+        method: 'track.removeTag',
         sk: sessionKey,
         artist,
         track,
         tag,
       },
-      true,
+      true
     );
   }
 
   /**
    * Unlove a track on the user's profile. Requires authentication.
    */
-  public async unlove(
-    sessionKey: string,
-    artist: string,
-    track: string,
-  ): Promise<void> {
+  public async unlove(sessionKey: string, artist: string, track: string): Promise<void> {
     await this.request(
-      "POST",
+      'POST',
       {
-        method: "track.unlove",
+        method: 'track.unlove',
         sk: sessionKey,
         artist,
         track,
       },
-      true,
+      true
     );
   }
 }

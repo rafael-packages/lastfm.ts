@@ -92,7 +92,7 @@ export class RateLimiter {
     const pending = [...this.queue];
     this.queue = [];
     for (const p of pending) {
-      p.reject(new Error("RateLimiter was destroyed."));
+      p.reject(new Error('RateLimiter was destroyed.'));
     }
   }
 }

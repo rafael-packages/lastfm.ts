@@ -1,17 +1,17 @@
 export type LastFmImage = {
-  size: "small" | "medium" | "large" | "extralarge";
-  "#text": string;
+  size: 'small' | 'medium' | 'large' | 'extralarge';
+  '#text': string;
 };
 
 export type LastFmArtistRef = {
   mbid: string;
   name: string;
-  "#text": string;
+  '#text': string;
   url?: string;
 };
 
 export type LastFmAlbumRef = {
-  "#text": string;
+  '#text': string;
   mbid: string;
 };
 
@@ -26,10 +26,10 @@ export type LastFmTrack = {
   image?: LastFmImage[];
   date?: {
     uts: string;
-    "#text": string;
+    '#text': string;
   };
-  "@attr"?: {
-    nowplaying: "true" | "false";
+  '@attr'?: {
+    nowplaying: 'true' | 'false';
   };
 };
 
@@ -47,7 +47,7 @@ export type LastFmUser = {
     image: LastFmImage[];
     registered: {
       unixtime: string;
-      "#text": number;
+      '#text': number;
     };
   };
 };
@@ -59,7 +59,7 @@ export type TrackInfoResponse = {
 export type RecentTracksResponse = {
   recenttracks: {
     track: LastFmTrack[];
-    "@attr": {
+    '@attr': {
       user: string;
       page: string;
       perPage: string;
@@ -234,7 +234,7 @@ export type TopAlbumsResponse = {
       artist: LastFmArtistRef | string;
       image: LastFmImage[];
     }>;
-    "@attr"?: {
+    '@attr'?: {
       artist?: string;
       user?: string;
       tag?: string;
@@ -257,7 +257,7 @@ export type TopArtistsResponse = {
       streamable?: string;
       image: LastFmImage[];
     }>;
-    "@attr"?: {
+    '@attr'?: {
       user?: string;
       tag?: string;
       page: string;
@@ -280,13 +280,13 @@ export type TopTracksResponse = {
       streamable:
         | string
         | {
-            "#text": string;
+            '#text': string;
             fulltrack: string;
           };
       artist: LastFmArtistRef | string;
       image: LastFmImage[];
     }>;
-    "@attr"?: {
+    '@attr'?: {
       artist?: string;
       user?: string;
       tag?: string;
@@ -305,7 +305,7 @@ export type TopTagsResponse = {
       count?: number;
       url: string;
     }>;
-    "@attr"?: {
+    '@attr'?: {
       artist?: string;
       album?: string;
       track?: string;
@@ -319,7 +319,7 @@ export type TagsResponse = {
       name: string;
       url: string;
     }>;
-    "@attr"?: {
+    '@attr'?: {
       artist?: string;
       album?: string;
       track?: string;
@@ -358,7 +358,7 @@ export type LibraryArtistsResponse = {
       streamable: string;
       image: LastFmImage[];
     }>;
-    "@attr": {
+    '@attr': {
       user: string;
       page: string;
       perPage: string;
@@ -375,7 +375,7 @@ export type TagSimilarResponse = {
       url: string;
       streamable: string;
     }>;
-    "@attr": {
+    '@attr': {
       tag: string;
     };
   };
@@ -384,11 +384,11 @@ export type TagSimilarResponse = {
 export type WeeklyChartListResponse = {
   weeklychartlist: {
     chart: Array<{
-      "#text"?: string;
+      '#text'?: string;
       from: string;
       to: string;
     }>;
-    "@attr"?: {
+    '@attr'?: {
       user?: string;
     };
   };
@@ -404,14 +404,14 @@ export type UserFriendsResponse = {
       image: LastFmImage[];
       registered: {
         unixtime: string;
-        "#text": number;
+        '#text': number;
       };
       playcount: string;
       playlists: string;
       bootstrap: string;
       type: string;
     }>;
-    "@attr": {
+    '@attr': {
       user: string;
       page: string;
       perPage: string;
@@ -429,18 +429,18 @@ export type LovedTracksResponse = {
       url: string;
       date: {
         uts: string;
-        "#text": string;
+        '#text': string;
       };
       artist: LastFmArtistRef;
       image: LastFmImage[];
       streamable:
         | string
         | {
-            "#text": string;
+            '#text': string;
             fulltrack: string;
           };
     }>;
-    "@attr": {
+    '@attr': {
       user: string;
       page: string;
       perPage: string;
@@ -469,7 +469,7 @@ export type PersonalTagsResponse = {
         image: LastFmImage[];
       }>;
     };
-    "@attr": {
+    '@attr': {
       user: string;
       tag: string;
       page: string;
@@ -490,7 +490,7 @@ export type WeeklyAlbumChartResponse = {
       playcount: string;
       rank: string;
     }>;
-    "@attr": {
+    '@attr': {
       user: string;
       from: string;
       to: string;
@@ -507,7 +507,7 @@ export type WeeklyArtistChartResponse = {
       playcount: string;
       rank: string;
     }>;
-    "@attr": {
+    '@attr': {
       user: string;
       from: string;
       to: string;
@@ -526,7 +526,7 @@ export type WeeklyTrackChartResponse = {
       rank: string;
       image: LastFmImage[];
     }>;
-    "@attr": {
+    '@attr': {
       user: string;
       from: string;
       to: string;

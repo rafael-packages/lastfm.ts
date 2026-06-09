@@ -28,7 +28,7 @@ export class ScrobbleQueue {
 
   constructor(
     scrobbleFn: (items: ScrobbleItem[]) => Promise<unknown>,
-    options: ScrobbleQueueOptions = {},
+    options: ScrobbleQueueOptions = {}
   ) {
     this.scrobbleFn = scrobbleFn;
     this.batchSize = options.batchSize ?? 50;
@@ -107,10 +107,7 @@ export class ScrobbleQueue {
     }
   }
 
-  private async sendBatchWithRetry(
-    batch: ScrobbleItem[],
-    attempt = 1,
-  ): Promise<unknown> {
+  private async sendBatchWithRetry(batch: ScrobbleItem[], attempt = 1): Promise<unknown> {
     try {
       return await this.scrobbleFn(batch);
     } catch (err) {
